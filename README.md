@@ -15,13 +15,13 @@ $ go get github.com/JulzDiverse/mingoak
   root.MkDirAll("path/to/dir/")
   root.WriteFile("path/to/dir/file", []byte("test"))
 
-  fileInfo := root.ReadDir("path/to/dir")
+  fileInfo, _ := root.ReadDir("path/to/dir")
   for _, v := fileInfo {
      fmt.Println(v.IsDir) //true or false
      fmt.Println(v.Name)  //name of file/dir
   }
 
-  file = root.ReadFile("path/to/dir/file")
+  file, _ = root.ReadFile("path/to/dir/file")
 ```
 
 
