@@ -1,6 +1,8 @@
 # MingOak
 
-A lightweight in-memory filesystem.
+A lightweight in-memory file tree.
+
+![mingoak](https://i.pinimg.com/736x/7f/4a/e3/7f4ae3efff8e660f80dfdfc8eb368d11--red-oak-tree-white-oak-tree.jpg){ width=200px }
 
 ```
 $ go get github.com/JulzDiverse/mingoak
