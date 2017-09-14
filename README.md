@@ -1,9 +1,13 @@
-# MingOak
+# MinGOak
 
 A lightweight, easy-to-use, in-memory file tree.
 
 ```
 $ go get github.com/JulzDiverse/mingoak
+```
+
+```
+import github.com/JulzDiverse/mingoak  
 ```
 
 ## Usage
