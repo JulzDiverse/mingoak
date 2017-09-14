@@ -22,6 +22,12 @@ $ go get github.com/JulzDiverse/mingoak
   }
 
   file, _ = root.ReadFile("path/to/dir/file")
+  
+  //Walk also works:
+  files, _ := root.Walk("path")
+  for _, v := files {
+     fmt.Prinln(v) //prints the file path
+  }
 ```
 
 

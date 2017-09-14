@@ -2,6 +2,7 @@ package mingoak
 
 import (
 	"errors"
+	"path/filepath"
 	"strings"
 )
 
@@ -92,6 +93,29 @@ func (d Dir) ReadDir(dirname string) ([]FileInfo, error) {
 		})
 	}
 	return leafs, nil
+}
+
+func (d Dir) Walk(path string) ([]string, error) {
+	dir, err := d.getDir(path)
+	if err != nil {
+		return nil, err
+	}
+
+	files := walkRecursion(dir, path)
+	return files, nil
+}
+
+func walkRecursion(dir Dir, basepath string) []string {
+	files := []string{}
+	for k, v := range dir.components {
+		if v.IsDir() {
+			subFiles := walkRecursion(v.(Dir), filepath.Join(basepath, k))
+			files = append(files, subFiles...)
+		} else {
+			files = append(files, filepath.Join(basepath, k))
+		}
+	}
+	return files
 }
 
 func (d Dir) getDir(path string) (Dir, error) {

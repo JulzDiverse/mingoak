@@ -92,4 +92,22 @@ var _ = Describe("Mingoak", func() {
 			})
 		})
 	})
+
+	Context("Walk", func() {
+		Context("When providing a root dir", func() {
+			It("should return a slice of string containg all files", func() {
+				root.MkDirAll("path/to/dir/")
+				root.WriteFile("fake1", []byte("hi"))
+				root.WriteFile("path/fake2", []byte("bye"))
+				root.WriteFile("path/to/fake3", []byte("ciao"))
+				files, err := root.Walk("")
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(len(files)).To(Equal(3))
+				Expect(files[0]).To(Equal("path/to/fake3"))
+				Expect(files[1]).To(Equal("path/fake2"))
+				Expect(files[2]).To(Equal("fake1"))
+			})
+		})
+	})
 })
