@@ -2,39 +2,30 @@ package mingoak
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
+	"time"
 )
 
-type Component interface {
+type FileMode uint32
+
+type FileInfo interface {
+	Name() string
+	Size() int64
+	Mode() FileMode
+	ModTime() time.Time
 	IsDir() bool
-}
-
-type Dir struct {
-	components map[string]Component
-}
-
-type File struct {
-	content []byte
-}
-
-type FileInfo struct {
-	Name  string
-	IsDir bool
+	Sys() interface{}
 }
 
 func MkRoot() *Dir {
 	return &Dir{
-		components: map[string]Component{},
+		components: map[string]FileInfo{},
+		name:       "root",
+		time:       time.Now(),
 	}
-}
-
-func (f File) IsDir() bool {
-	return false
-}
-
-func (d Dir) IsDir() bool {
-	return true
 }
 
 func (d Dir) WriteFile(path string, file []byte) error {
@@ -48,6 +39,8 @@ func (d Dir) WriteFile(path string, file []byte) error {
 		if i == len(sl)-1 {
 			current.components[name] = File{
 				content: file,
+				name:    name,
+				time:    time.Now(),
 			}
 			break
 		}
@@ -66,14 +59,16 @@ func (d Dir) ReadFile(path string) ([]byte, error) {
 			return file.content, nil
 		}
 	}
-	return nil, errors.New("File not found!")
+	return nil, errors.New(fmt.Sprintf("File %s not found!", path))
 }
 
 func (d Dir) MkDirAll(path string) {
 	current := d
 	for _, name := range slicePath(path) {
 		current.components[name] = Dir{
-			map[string]Component{},
+			components: map[string]FileInfo{},
+			name:       name,
+			time:       time.Now(),
 		}
 		current = current.components[name].(Dir)
 	}
@@ -86,12 +81,10 @@ func (d Dir) ReadDir(dirname string) ([]FileInfo, error) {
 		return nil, err
 	}
 
-	for k, v := range dir.components {
-		leafs = append(leafs, FileInfo{
-			Name:  k,
-			IsDir: v.IsDir(),
-		})
+	for _, v := range dir.components {
+		leafs = append(leafs, v)
 	}
+
 	return leafs, nil
 }
 
@@ -115,6 +108,7 @@ func walkRecursion(dir Dir, basepath string) []string {
 			files = append(files, filepath.Join(basepath, k))
 		}
 	}
+	sort.Strings(files)
 	return files
 }
 
@@ -124,7 +118,7 @@ func (d Dir) getDir(path string) (Dir, error) {
 		if result, ok := current.components[name]; ok && result.IsDir() {
 			current = result.(Dir)
 		} else {
-			return Dir{}, errors.New("Directory not found!")
+			return Dir{}, errors.New(fmt.Sprintf("Directory %s not found!", path))
 		}
 	}
 	return current, nil
