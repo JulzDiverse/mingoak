@@ -3,9 +3,10 @@ package mingoak
 import "time"
 
 type Dir struct {
-	components map[string]FileInfo
-	name       string
-	time       time.Time
+	components  map[string]FileInfo
+	componentsl []FileInfo
+	name        string
+	time        time.Time
 }
 
 func (d Dir) IsDir() bool {

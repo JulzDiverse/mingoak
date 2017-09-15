@@ -28,7 +28,7 @@ func MkRoot() *Dir {
 	}
 }
 
-func (d Dir) WriteFile(path string, file []byte) error {
+func (d *Dir) WriteFile(path string, file []byte) error {
 	if path == "" {
 		return errors.New("No file name or path provided!")
 	}
@@ -37,58 +37,56 @@ func (d Dir) WriteFile(path string, file []byte) error {
 	sl := slicePath(path)
 	for i, name := range sl {
 		if i == len(sl)-1 {
-			current.components[name] = File{
+			fileInfo := File{
 				content: file,
 				name:    name,
 				time:    time.Now(),
 			}
+			current.components[name] = &fileInfo
+			current.componentsl = append(current.componentsl, &fileInfo)
 			break
 		}
-		current = current.components[name].(Dir)
+		current = current.components[name].(*Dir)
 	}
 	return nil
 }
 
-func (d Dir) ReadFile(path string) ([]byte, error) {
+func (d *Dir) ReadFile(path string) ([]byte, error) {
 	current := d
 	for _, name := range slicePath(path) {
 		if result, ok := current.components[name]; ok && result.IsDir() {
-			current = result.(Dir)
+			current = result.(*Dir)
 		} else if result, ok := current.components[name]; ok {
-			file := result.(File)
+			file := result.(*File)
 			return file.content, nil
 		}
 	}
 	return nil, errors.New(fmt.Sprintf("File %s not found!", path))
 }
 
-func (d Dir) MkDirAll(path string) {
+func (d *Dir) MkDirAll(path string) {
 	current := d
 	for _, name := range slicePath(path) {
-		current.components[name] = Dir{
+		dir := Dir{
 			components: map[string]FileInfo{},
 			name:       name,
 			time:       time.Now(),
 		}
-		current = current.components[name].(Dir)
+		current.components[name] = &dir
+		current.componentsl = append(current.componentsl, &dir)
+		current = current.components[name].(*Dir)
 	}
 }
 
-func (d Dir) ReadDir(dirname string) ([]FileInfo, error) {
-	leafs := []FileInfo{}
+func (d *Dir) ReadDir(dirname string) ([]FileInfo, error) {
 	dir, err := d.getDir(dirname)
 	if err != nil {
 		return nil, err
 	}
-
-	for _, v := range dir.components {
-		leafs = append(leafs, v)
-	}
-
-	return leafs, nil
+	return dir.componentsl, nil
 }
 
-func (d Dir) Walk(path string) ([]string, error) {
+func (d *Dir) Walk(path string) ([]string, error) {
 	dir, err := d.getDir(path)
 	if err != nil {
 		return nil, err
@@ -98,11 +96,11 @@ func (d Dir) Walk(path string) ([]string, error) {
 	return files, nil
 }
 
-func walkRecursion(dir Dir, basepath string) []string {
+func walkRecursion(dir *Dir, basepath string) []string {
 	files := []string{}
 	for k, v := range dir.components {
 		if v.IsDir() {
-			subFiles := walkRecursion(v.(Dir), filepath.Join(basepath, k))
+			subFiles := walkRecursion(v.(*Dir), filepath.Join(basepath, k))
 			files = append(files, subFiles...)
 		} else {
 			files = append(files, filepath.Join(basepath, k))
@@ -112,13 +110,13 @@ func walkRecursion(dir Dir, basepath string) []string {
 	return files
 }
 
-func (d Dir) getDir(path string) (Dir, error) {
+func (d *Dir) getDir(path string) (*Dir, error) {
 	current := d
 	for _, name := range slicePath(path) {
 		if result, ok := current.components[name]; ok && result.IsDir() {
-			current = result.(Dir)
+			current = result.(*Dir)
 		} else {
-			return Dir{}, errors.New(fmt.Sprintf("Directory %s not found!", path))
+			return &Dir{}, errors.New(fmt.Sprintf("Directory %s not found!", path))
 		}
 	}
 	return current, nil
