@@ -23,8 +23,10 @@ import github.com/JulzDiverse/mingoak
 
   fileInfo, _ := root.ReadDir("path/to/dir")
   for _, v := fileInfo {
-     fmt.Println(v.IsDir) //true or false
-     fmt.Println(v.Name)  //name of file/dir
+     pintln(v.IsDir()) //true or false
+     println(v.Name())  //name of file/dir
+     println(v.ModTime()) //modification time
+     println(v.Size()) //file size
   }
 
   file, _ = root.ReadFile("path/to/dir/file")
