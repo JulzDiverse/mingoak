@@ -14,7 +14,7 @@ var _ = Describe("Mingoak", func() {
 		root = MkRoot()
 	})
 
-	Context("Add/Get Dir", func() {
+	Context("MkDirAll/Read Dir", func() {
 		Context("When adding an component to a component with Add", func() {
 			It("is an existing subcomponent", func() {
 				root.MkDirAll("subdir")
@@ -27,14 +27,14 @@ var _ = Describe("Mingoak", func() {
 		Context("When adding a component with a path", func() {
 			It("it creates all subcomponents", func() {
 				root.MkDirAll("path/to/dir/")
-
 				fileInfo, err := root.ReadDir("path")
+
 				Expect(err).ToNot(HaveOccurred())
-				Expect(fileInfo[0].Name).To(Equal("to"))
+				Expect(fileInfo[0].Name()).To(Equal("to"))
 				Expect(len(fileInfo)).To(Equal(1))
 
 				fileInfo, err = root.ReadDir("path/to")
-				Expect(fileInfo[0].Name).To(Equal("dir"))
+				Expect(fileInfo[0].Name()).To(Equal("dir"))
 				Expect(err).ToNot(HaveOccurred())
 
 				fileInfo, err = root.ReadDir("path/to/dir")
@@ -54,8 +54,8 @@ var _ = Describe("Mingoak", func() {
 		})
 	})
 
-	Context("Add/Get File", func() {
-		Context("When adding a file with Add", func() {
+	Context("Write/Read File", func() {
+		Context("When writing a file", func() {
 			Context("providing a single file name", func() {
 
 				It("exists in the root", func() {
@@ -83,11 +83,12 @@ var _ = Describe("Mingoak", func() {
 			Context("providing an empty string", func() {
 				It("returns an error", func() {
 					root.MkDirAll("new/dir/")
-					root.WriteFile("", []byte("test"))
-
-					_, err := root.ReadFile("new/dir/file")
+					err := root.WriteFile("", []byte("test"))
 					Expect(err).To(HaveOccurred())
-					Expect(err).To(MatchError("File not found!"))
+
+					_, err = root.ReadFile("new/dir/file")
+					Expect(err).To(HaveOccurred())
+					Expect(err).To(MatchError("error new/dir/file: file not found!"))
 				})
 			})
 		})
