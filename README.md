@@ -1,6 +1,8 @@
 # MinGOak
 
-A lightweight, easy-to-use, in-memory file tree.
+A lightweight, easy-to-use, in-memory file tree. 
+
+--> `mingoak` implements [os.FilePath](https://golang.org/pkg/os/#FileInfo)
 
 ```
 $ go get github.com/JulzDiverse/mingoak
