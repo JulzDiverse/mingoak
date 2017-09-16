@@ -1,10 +1,13 @@
 package mingoak
 
-import "time"
+import (
+	"os"
+	"time"
+)
 
 type Dir struct {
-	components  map[string]FileInfo
-	componentsl []FileInfo
+	components  map[string]os.FileInfo
+	componentsl []os.FileInfo
 	name        string
 	time        time.Time
 }
@@ -21,7 +24,7 @@ func (d Dir) Size() int64 {
 	return 1
 }
 
-func (d Dir) Mode() FileMode {
+func (d Dir) Mode() os.FileMode {
 	return 777
 }
 

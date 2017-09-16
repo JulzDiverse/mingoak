@@ -3,26 +3,16 @@ package mingoak
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
 )
 
-type FileMode uint32
-
-type FileInfo interface {
-	Name() string
-	Size() int64
-	Mode() FileMode
-	ModTime() time.Time
-	IsDir() bool
-	Sys() interface{}
-}
-
 func MkRoot() *Dir {
 	return &Dir{
-		components: map[string]FileInfo{},
+		components: map[string]os.FileInfo{},
 		name:       "root",
 		time:       time.Now(),
 	}
@@ -67,18 +57,21 @@ func (d *Dir) ReadFile(path string) ([]byte, error) {
 func (d *Dir) MkDirAll(path string) {
 	current := d
 	for _, name := range slicePath(path) {
-		dir := Dir{
-			components: map[string]FileInfo{},
-			name:       name,
-			time:       time.Now(),
+		_, ok := current.components[name]
+		if !ok {
+			dir := Dir{
+				components: map[string]os.FileInfo{},
+				name:       name,
+				time:       time.Now(),
+			}
+			current.components[name] = &dir
+			current.componentsl = append(current.componentsl, &dir)
 		}
-		current.components[name] = &dir
-		current.componentsl = append(current.componentsl, &dir)
 		current = current.components[name].(*Dir)
 	}
 }
 
-func (d *Dir) ReadDir(dirname string) ([]FileInfo, error) {
+func (d *Dir) ReadDir(dirname string) ([]os.FileInfo, error) {
 	dir, err := d.getDir(dirname)
 	if err != nil {
 		return nil, err

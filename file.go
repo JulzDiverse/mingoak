@@ -1,6 +1,9 @@
 package mingoak
 
-import "time"
+import (
+	"os"
+	"time"
+)
 
 type File struct {
 	content []byte
@@ -20,7 +23,7 @@ func (d File) Size() int64 {
 	return int64(len(d.content))
 }
 
-func (d File) Mode() FileMode {
+func (d File) Mode() os.FileMode {
 	return 777
 }
 
